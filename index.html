@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marvel Checklist</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0f1115;
+    color: #e8e8ea;
+    margin: 0;
+    padding: 20px 20px 60px 20px;
+  }
+  h1 {
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    color: #9a9aa5;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+  }
+  .progress {
+    background: #1c1f26;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .progress-note {
+    color: #6a6d76;
+    font-size: 0.72rem;
+    margin: -8px 0 20px 0;
+    line-height: 1.4;
+  }
+  .progress-bar-bg {
+    background: #2a2e38;
+    border-radius: 6px;
+    height: 8px;
+    width: 100%;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    background: linear-gradient(90deg, #ed1d24, #a91217);
+    height: 100%;
+    transition: width 0.3s ease;
+  }
+  .year-group {
+    margin-bottom: 18px;
+  }
+  .year-label {
+    font-weight: 700;
+    color: #ed1d24;
+    font-size: 0.95rem;
+    margin: 18px 0 8px 0;
+    letter-spacing: 0.5px;
+  }
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #1a1d24;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .item:active {
+    background: #24272f;
+  }
+  .item.checked {
+    opacity: 0.55;
+  }
+  .item.checked .title {
+    text-decoration: line-through;
+  }
+  .checkbox {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border-radius: 5px;
+    border: 2px solid #555b68;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    background: transparent;
+  }
+  .item.checked .checkbox {
+    background: #ed1d24;
+    border-color: #ed1d24;
+  }
+  .text-block {
+    flex: 1;
+  }
+  .title {
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  .meta {
+    font-size: 0.78rem;
+    color: #9a9aa5;
+    margin-top: 2px;
+  }
+  .type-tag {
+    font-weight: 600;
+  }
+  .type-tag.type-movie { color: #6ea8ff; }
+  .type-tag.type-series { color: #7fd88f; }
+  .type-tag.type-oneshot { color: #f0c14b; }
+  .type-tag.type-special { color: #ff9d6e; }
+  .type-tag.type-shorts { color: #d68fff; }
+  .type-tag.type-other { color: #9a9aa5; }
+  .badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    background: #2a2e38;
+    color: #cfd2da;
+  }
+  .badge.upcoming {
+    background: #3a2e10;
+    color: #f0c14b;
+  }
+  .buttons {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  button.action {
+    background: #ed1d24;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.action.secondary {
+    background: #2a2e38;
+    color: #e8e8ea;
+  }
+  button.action.tab {
+    background: #1c1f26;
+    color: #9a9aa5;
+    border: 1px solid #2a2e38;
+  }
+  button.action.tab.active {
+    background: #ed1d24;
+    color: white;
+    border-color: #ed1d24;
+  }
+  .section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 26px 0 6px 0;
+  }
+  .section-note {
+    color: #9a9aa5;
+    font-size: 0.8rem;
+    margin-bottom: 14px;
+  }
+  .priority-label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin: 16px 0 8px 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .priority-label.essential { color: #ed1d24; }
+  .priority-label.optional { color: #f0c14b; }
+  .priority-label.side { color: #6ea8ff; }
+  .priority-label.non-mcu { color: #b485f0; }
+  .badge.essential { background: #3a1416; color: #ff8a8f; }
+  .badge.optional { background: #3a2e10; color: #f0c14b; }
+  .badge.side { background: #10233a; color: #6ea8ff; }
+  .badge.non-mcu { background: #2a1a3a; color: #b485f0; }
+  .credit-footer {
+    text-align: center;
+    padding: 4px 0 24px 0;
+    color: #6a6d76;
+    font-size: 0.75rem;
+  }
+  .credit-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .credit-line a {
+    color: #9a9aa5;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid #4a4d56;
+  }
+  .credit-line a:hover {
+    color: #e8e8ea;
+  }
+  .danger-zone {
+    margin-top: 36px;
+    padding: 20px 0 40px 0;
+    border-top: 1px solid #24262d;
+    text-align: center;
+  }
+  button.action.danger-link {
+    background: #1c1f26;
+    color: #9a9aa5;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid #2a2e38;
+    text-decoration: none;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  button.action.danger-link.armed {
+    color: #ff8a8f;
+    font-weight: 700;
+    background: #2a1416;
+    border-color: #ff8a8f;
+  }
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    background: #1a1d24;
+    color: #e8e8ea;
+    border: 1px solid #2a2e38;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    display: none;
+    min-height: 160px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Marvel Checklist</h1>
+<div class="subtitle">Every Marvel Studios movie, series and special from 1986 to now, plus non-MCU Marvel movies from other studios. Tap to check off what you've watched. Streaming links are for India.</div>
+
+<div class="progress">
+  <div style="width:100%">
+    <div style="display:flex; justify-content:space-between;">
+      <span id="progressText">0 / 0 watched</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+</div>
+<div class="progress-note">This number only covers the main list. Classic Cartoons, One-Shots, and Old Movies have their own separate counters below and aren't included here.</div>
+
+<div class="buttons">
+  <button class="action tab active" id="tabYear" onclick="setView('year')">By year</button>
+  <button class="action tab" id="tabPriority" onclick="setView('priority')">By priority</button>
+  <button class="action tab" id="tabCartoons" onclick="setView('cartoons')">Classic Cartoons</button>
+  <button class="action tab" id="tabOneShots" onclick="setView('oneshots')">One-Shots</button>
+  <button class="action tab" id="tabOldMovies" onclick="setView('oldmovies')">Old Movies</button>
+</div>
+
+<div class="buttons">
+  <button class="action" onclick="toggleExport('unwatched')">Export not watched</button>
+  <button class="action secondary" onclick="toggleExport('watched')">Export watched</button>
+</div>
+
+<textarea id="exportBox" readonly></textarea>
+
+<div id="list"></div>
+
+<div class="danger-zone">
+  <button class="action danger-link" id="clearBtn" onclick="confirmClearAll()">Clear all checks</button>
+</div>
+
+<div class="credit-footer">
+  <div class="credit-line">
+    <svg class="claude-logo" viewBox="0 0 24 24" width="14" height="14">
+      <path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-2.266-.122-.571-.121L0 11.784l.055-.352.48-.321.686.06 1.52.103 2.278.158 1.652.097 2.449.255h.389l.055-.157-.134-.098-.103-.097-2.358-1.596-2.552-1.688-1.336-.972-.724-.491-.364-.462-.158-1.008.656-.722.881.06.225.061.893.686 1.908 1.476 2.491 1.833.365.304.145-.103.019-.073-.164-.274-1.355-2.446-1.446-2.49-.644-1.032-.17-.619a2.97 2.97 0 01-.104-.729L6.283.134 6.696 0l.996.134.42.364.62 1.414 1.002 2.229 1.555 3.03.456.898.243.832.091.255h.158V9.01l.128-1.706.237-2.095.23-2.695.08-.76.376-.91.747-.492.584.28.48.685-.067.444-.286 1.851-.559 2.903-.364 1.942h.212l.243-.242.985-1.306 1.652-2.064.73-.82.85-.904.547-.431h1.033l.76 1.129-.34 1.166-1.064 1.347-.881 1.142-1.264 1.7-.79 1.36.073.11.188-.02 2.856-.606 1.543-.28 1.841-.315.833.388.091.395-.328.807-1.969.486-2.309.462-3.439.813-.042.03.049.061 1.549.146.662.036h1.622l3.02.225.79.522.474.638-.079.485-1.215.62-1.64-.389-3.829-.91-1.312-.329h-.182v.11l1.093 1.068 2.006 1.81 2.509 2.33.127.578-.322.455-.34-.049-2.205-1.657-.851-.747-1.926-1.62h-.128v.17l.444.649 2.345 3.521.122 1.08-.17.353-.608.213-.668-.122-1.374-1.925-1.415-2.167-1.143-1.943-.14.08-.674 7.254-.316.37-.729.28-.607-.461-.322-.747.322-1.476.389-1.924.315-1.53.286-1.9.17-.632-.012-.042-.14.018-1.434 1.967-2.18 2.945-1.726 1.845-.414.164-.717-.37.067-.662.401-.589 2.388-3.036 1.44-1.882.93-1.086-.006-.158h-.055L4.132 18.56l-1.13.146-.487-.456.061-.746.231-.243 1.908-1.312-.006.006z" fill="#D97757" fill-rule="nonzero"/>
+    </svg>
+    Built using Claude
+  </div>
+  <div class="credit-line">
+    <svg class="insta-logo" viewBox="0 0 24 24" width="14" height="14">
+      <defs>
+        <radialGradient id="igGradient" cx="30%" cy="107%" r="150%">
+          <stop offset="0%" stop-color="#fdf497"/>
+          <stop offset="5%" stop-color="#fdf497"/>
+          <stop offset="45%" stop-color="#fd5949"/>
+          <stop offset="60%" stop-color="#d6249f"/>
+          <stop offset="90%" stop-color="#285AEB"/>
+        </radialGradient>
+      </defs>
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#igGradient)"/>
+      <circle cx="12" cy="12" r="4.2" stroke="#fff" stroke-width="1.6" fill="none"/>
+      <circle cx="17.3" cy="6.7" r="1.1" fill="#fff"/>
+    </svg>
+    Built by <a href="https://www.instagram.com/also.surajnagendra?igsh=bjE0MXNpeTBmcndu" target="_blank" rel="noopener">also.surajnagendra</a>. Drop a follow.
+  </div>
+</div>
+
+<script>
+const data = [
+  { year: "1998", items: [
+    { title: "Blade", type: "Movie", date: "Aug 1998", priority: "non-mcu" , stream: "Streaming partner not found" },
+  ]},
+  { year: "2000", items: [
+    { title: "X-Men", type: "Movie", date: "July 2000", priority: "essential" , stream: "JioHotstar" , differentContinuity: true },
+  ]},
+  { year: "2002", items: [
+    { title: "Blade II", type: "Movie", date: "March 2002", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Spider-Man", type: "Movie", date: "May 2002", priority: "essential" , stream: "Prime Video / SonyLIV" , differentContinuity: true },
+  ]},
+  { year: "2003", items: [
+    { title: "Daredevil", type: "Movie", date: "Feb 2003", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "X2: X-Men United", type: "Movie", date: "May 2003", priority: "essential" , stream: "JioHotstar" , differentContinuity: true },
+    { title: "Hulk", type: "Movie", date: "June 2003", priority: "non-mcu" , stream: "Streaming partner not found" },
+  ]},
+  { year: "2004", items: [
+    { title: "Spider-Man 2", type: "Movie", date: "June 2004", priority: "essential" , stream: "Streaming partner not found" , differentContinuity: true },
+    { title: "Blade: Trinity", type: "Movie", date: "Dec 2004", priority: "non-mcu" , stream: "Streaming partner not found" },
+  ]},
+  { year: "2005", items: [
+    { title: "Elektra", type: "Movie", date: "Jan 2005", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Fantastic Four (2005)", type: "Movie", date: "July 2005", priority: "non-mcu" , stream: "JioHotstar" },
+  ]},
+  { year: "2006", items: [
+    { title: "X-Men: The Last Stand", type: "Movie", date: "May 2006", priority: "essential" , stream: "JioHotstar" , differentContinuity: true },
+  ]},
+  { year: "2007", items: [
+    { title: "Ghost Rider", type: "Movie", date: "Feb 2007", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Fantastic Four: Rise of the Silver Surfer", type: "Movie", date: "June 2007", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Spider-Man 3", type: "Movie", date: "May 2007", priority: "essential" , stream: "Prime Video / SonyLIV" , differentContinuity: true },
+  ]},
+  { year: "2008", items: [
+    { title: "Iron Man", type: "Movie", date: "May 2008", priority: "essential" , stream: "JioHotstar" },
+    { title: "The Incredible Hulk", type: "Movie", date: "June 2008", priority: "optional" , stream: "JioHotstar" },
+    { title: "Punisher: War Zone", type: "Movie", date: "Dec 2008", priority: "non-mcu" , stream: "Netflix / Prime Video / MX Player" },
+  ]},
+  { year: "2009", items: [
+    { title: "X-Men Origins: Wolverine", type: "Movie", date: "May 2009", priority: "non-mcu" , stream: "JioHotstar" },
+  ]},
+  { year: "2010", items: [
+    { title: "Iron Man 2", type: "Movie", date: "May 2010", priority: "essential" , stream: "JioHotstar" },
+    { title: "Kick-Ass", type: "Movie", date: "April 2010", priority: "non-mcu" , stream: "Streaming partner not found" },
+  ]},
+  { year: "2011", items: [
+    { title: "Thor", type: "Movie", date: "May 2011", priority: "essential" , stream: "JioHotstar" },
+    { title: "Captain America: The First Avenger", type: "Movie", date: "July 2011", priority: "essential" , stream: "JioHotstar" },
+    { title: "X-Men: First Class", type: "Movie", date: "June 2011", priority: "non-mcu" , stream: "JioHotstar" },
+  ]},
+  { year: "2012", items: [
+    { title: "The Avengers", type: "Movie", date: "May 2012", priority: "essential" , stream: "JioHotstar" },
+    { title: "Ghost Rider: Spirit of Vengeance", type: "Movie", date: "Feb 2012", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "The Amazing Spider-Man", type: "Movie", date: "July 2012", priority: "essential" , stream: "JioHotstar / Netflix / Prime Video" , differentContinuity: true },
+  ]},
+  { year: "2013", items: [
+    { title: "Agents of S.H.I.E.L.D., Season 1", type: "Series", date: "Sept 2013", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Iron Man 3", type: "Movie", date: "May 2013", priority: "essential" , stream: "JioHotstar" },
+    { title: "The Wolverine", type: "Movie", date: "July 2013", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Kick-Ass 2", type: "Movie", date: "Aug 2013", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Thor: The Dark World", type: "Movie", date: "Nov 2013", priority: "essential" , stream: "JioHotstar" },
+  ]},
+  { year: "2014", items: [
+    { title: "Agents of S.H.I.E.L.D., Season 2", type: "Series", date: "Sept 2014", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Captain America: The Winter Soldier", type: "Movie", date: "April 2014", priority: "essential" , stream: "JioHotstar" },
+    { title: "The Amazing Spider-Man 2", type: "Movie", date: "May 2014", priority: "essential" , stream: "Prime Video" , differentContinuity: true },
+    { title: "X-Men: Days of Future Past", type: "Movie", date: "May 2014", priority: "essential" , stream: "JioHotstar" , differentContinuity: true },
+    { title: "Guardians of the Galaxy", type: "Movie", date: "Aug 2014", priority: "essential" , stream: "JioHotstar" },
+  ]},
+  { year: "2015", items: [
+    { title: "Agent Carter, Season 1", type: "Series", date: "Jan 2015", priority: "optional" , stream: "JioHotstar" },
+    { title: "Agents of S.H.I.E.L.D., Season 3", type: "Series", date: "Sept 2015", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Daredevil, Season 1", type: "Series", date: "April 2015", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Avengers: Age of Ultron", type: "Movie", date: "May 2015", priority: "essential" , stream: "JioHotstar" },
+    { title: "Fantastic Four (2015)", type: "Movie", date: "Aug 2015", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Ant-Man", type: "Movie", date: "July 2015", priority: "essential" , stream: "JioHotstar" },
+    { title: "Jessica Jones, Season 1", type: "Series", date: "Nov 2015", priority: "non-mcu" , stream: "Netflix" },
+  ]},
+  { year: "2016", items: [
+    { title: "Agent Carter, Season 2", type: "Series", date: "Jan 2016", priority: "optional" , stream: "JioHotstar" },
+    { title: "Deadpool", type: "Movie", date: "Feb 2016", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Daredevil, Season 2", type: "Series", date: "March 2016", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Captain America: Civil War", type: "Movie", date: "May 2016", priority: "essential" , stream: "JioHotstar" },
+    { title: "X-Men: Apocalypse", type: "Movie", date: "May 2016", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Agents of S.H.I.E.L.D., Season 4", type: "Series", date: "Sept 2016", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Luke Cage, Season 1", type: "Series", date: "Sept 2016", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Doctor Strange", type: "Movie", date: "Nov 2016", priority: "essential" , stream: "JioHotstar" },
+  ]},
+  { year: "2017", items: [
+    { title: "Legion, Season 1", type: "Series", date: "Feb 2017", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Iron Fist, Season 1", type: "Series", date: "March 2017", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Logan", type: "Movie", date: "March 2017", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Guardians of the Galaxy Vol. 2", type: "Movie", date: "May 2017", priority: "essential" , stream: "JioHotstar" },
+    { title: "Agents of S.H.I.E.L.D., Season 5", type: "Series", date: "Dec 2017", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Spider-Man: Homecoming", type: "Movie", date: "July 2017", priority: "essential" , stream: "JioHotstar" },
+    { title: "The Defenders", type: "Series", date: "Aug 2017", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Inhumans, Season 1", type: "Series", date: "Sept 2017", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "The Gifted, Season 1", type: "Series", date: "Oct 2017", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Runaways, Season 1", type: "Series", date: "Nov 2017", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "The Punisher, Season 1", type: "Series", date: "Nov 2017", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Thor: Ragnarok", type: "Movie", date: "Nov 2017", priority: "essential" , stream: "JioHotstar" },
+  ]},
+  { year: "2018", items: [
+    { title: "Black Panther", type: "Movie", date: "Feb 2018", priority: "essential" , stream: "JioHotstar" },
+    { title: "Legion, Season 2", type: "Series", date: "April 2018", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Cloak & Dagger, Season 1", type: "Series", date: "June 2018", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "The Gifted, Season 2", type: "Series", date: "Sept 2018", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Jessica Jones, Season 2", type: "Series", date: "March 2018", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Luke Cage, Season 2", type: "Series", date: "June 2018", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Runaways, Season 2", type: "Series", date: "Dec 2018", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Iron Fist, Season 2", type: "Series", date: "Sept 2018", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Avengers: Infinity War", type: "Movie", date: "April 2018", priority: "essential" , stream: "JioHotstar" },
+    { title: "Daredevil, Season 3", type: "Series", date: "Oct 2018", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Deadpool 2", type: "Movie", date: "May 2018", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Ant-Man and the Wasp", type: "Movie", date: "July 2018", priority: "essential" , stream: "JioHotstar" },
+    { title: "Venom", type: "Movie", date: "Oct 2018", priority: "non-mcu" , stream: "JioHotstar / Netflix / Prime Video" },
+    { title: "Spider-Man: Into the Spider-Verse", type: "Movie (Animated)", date: "Dec 2018", priority: "non-mcu" , stream: "Prime Video / SonyLIV" },
+  ]},
+  { year: "2019", items: [
+    { title: "The Punisher, Season 2", type: "Series", date: "Jan 2019", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Agents of S.H.I.E.L.D., Season 6", type: "Series", date: "May 2019", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Legion, Season 3", type: "Series", date: "June 2019", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Cloak & Dagger, Season 2", type: "Series", date: "April 2019", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Runaways, Season 3", type: "Series", date: "Dec 2019", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Jessica Jones, Season 3", type: "Series", date: "June 2019", priority: "non-mcu" , stream: "Netflix" },
+    { title: "Captain Marvel", type: "Movie", date: "March 2019", priority: "essential" , stream: "JioHotstar" },
+    { title: "Avengers: Endgame", type: "Movie", date: "April 2019", priority: "essential" , stream: "JioHotstar" },
+    { title: "Dark Phoenix", type: "Movie", date: "June 2019", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Spider-Man: Far From Home", type: "Movie", date: "July 2019", priority: "essential" , stream: "JioHotstar" },
+  ]},
+  { year: "2020", items: [
+    { title: "Agents of S.H.I.E.L.D., Season 7", type: "Series", date: "May 2020", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Helstrom", type: "Series", date: "Oct 2020", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "The New Mutants", type: "Movie", date: "Aug 2020", priority: "non-mcu" , stream: "JioHotstar" },
+  ]},
+  { year: "2021", items: [
+    { title: "WandaVision", type: "Series", date: "Jan 2021", priority: "essential" , stream: "JioHotstar" },
+    { title: "The Falcon and the Winter Soldier", type: "Series", date: "March 2021", priority: "essential" , stream: "JioHotstar" },
+    { title: "Loki, Season 1", type: "Series", date: "June 2021", priority: "essential" , stream: "JioHotstar" },
+    { title: "Black Widow", type: "Movie", date: "July 2021", priority: "essential" , stream: "JioHotstar" },
+    { title: "What If...?, Season 1", type: "Series", date: "Aug 2021", priority: "optional" , stream: "JioHotstar" },
+    { title: "Shang-Chi and the Legend of the Ten Rings", type: "Movie", date: "Sept 2021", priority: "essential" , stream: "JioHotstar" },
+    { title: "Venom: Let There Be Carnage", type: "Movie", date: "Oct 2021", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "Eternals", type: "Movie", date: "Nov 2021", priority: "essential" , stream: "JioHotstar" },
+    { title: "Hawkeye", type: "Series", date: "Nov 2021", priority: "essential" , stream: "JioHotstar" },
+    { title: "Spider-Man: No Way Home", type: "Movie", date: "Dec 2021", priority: "essential" , stream: "JioHotstar" },
+  ]},
+  { year: "2022", items: [
+    { title: "Moon Knight", type: "Series", date: "March 2022", priority: "optional" , stream: "JioHotstar" },
+    { title: "Morbius", type: "Movie", date: "April 2022", priority: "non-mcu" , stream: "JioHotstar / Netflix / SonyLIV" },
+    { title: "Doctor Strange in the Multiverse of Madness", type: "Movie", date: "May 2022", priority: "essential" , stream: "JioHotstar" },
+    { title: "Ms. Marvel", type: "Series", date: "June 2022", priority: "optional" , stream: "JioHotstar" },
+    { title: "I Am Groot, Season 1", type: "Shorts", date: "Aug 2022", priority: "side" , stream: "JioHotstar" },
+    { title: "Thor: Love and Thunder", type: "Movie", date: "July 2022", priority: "optional" , stream: "JioHotstar" },
+    { title: "She-Hulk: Attorney at Law", type: "Series", date: "Aug 2022", priority: "optional" , stream: "JioHotstar" },
+    { title: "Werewolf by Night", type: "Special", date: "Oct 2022", priority: "side" , stream: "JioHotstar" },
+    { title: "Black Panther: Wakanda Forever", type: "Movie", date: "Nov 2022", priority: "essential" , stream: "JioHotstar" },
+    { title: "The Guardians of the Galaxy Holiday Special", type: "Special", date: "Nov 2022", priority: "side" , stream: "JioHotstar" },
+  ]},
+  { year: "2023", items: [
+    { title: "Ant-Man and the Wasp: Quantumania", type: "Movie", date: "Feb 2023", priority: "essential" , stream: "JioHotstar" },
+    { title: "Guardians of the Galaxy Vol. 3", type: "Movie", date: "May 2023", priority: "essential" , stream: "JioHotstar" },
+    { title: "Secret Invasion", type: "Series", date: "June 2023", priority: "essential" , stream: "JioHotstar" },
+    { title: "Spider-Man: Across the Spider-Verse", type: "Movie (Animated)", date: "June 2023", priority: "non-mcu" , stream: "Streaming partner not found" },
+    { title: "I Am Groot, Season 2", type: "Shorts", date: "Aug 2023", priority: "side" , stream: "JioHotstar" },
+    { title: "Loki, Season 2", type: "Series", date: "Oct 2023", priority: "essential" , stream: "JioHotstar" },
+    { title: "The Marvels", type: "Movie", date: "Nov 2023", priority: "essential" , stream: "JioHotstar" },
+    { title: "What If...?, Season 2", type: "Series", date: "Dec 2023", priority: "optional" , stream: "JioHotstar" },
+  ]},
+  { year: "2024", items: [
+    { title: "Echo", type: "Series", date: "Jan 2024", priority: "essential" , stream: "JioHotstar" },
+    { title: "Madame Web", type: "Movie", date: "Feb 2024", priority: "non-mcu" , stream: "JioHotstar / Netflix / Prime Video" },
+    { title: "X-Men '97, Season 1", type: "Series", date: "March 2024", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Deadpool & Wolverine", type: "Movie", date: "July 2024", priority: "essential" , stream: "JioHotstar" },
+    { title: "Agatha All Along", type: "Series", date: "Sept 2024", priority: "optional" , stream: "JioHotstar" },
+    { title: "Venom: The Last Dance", type: "Movie", date: "Oct 2024", priority: "non-mcu" , stream: "Netflix / Prime Video" },
+    { title: "Kraven the Hunter", type: "Movie", date: "Dec 2024", priority: "non-mcu" , stream: "Netflix / Prime Video" },
+    { title: "What If...?, Season 3", type: "Series", date: "Dec 2024", priority: "optional" , stream: "JioHotstar" },
+  ]},
+  { year: "2025", items: [
+    { title: "Your Friendly Neighborhood Spider-Man", type: "Series", date: "Jan 2025", priority: "side" , stream: "JioHotstar" },
+    { title: "Captain America: Brave New World", type: "Movie", date: "Feb 2025", priority: "essential" , stream: "JioHotstar" },
+    { title: "Daredevil: Born Again, Season 1", type: "Series", date: "March 2025", priority: "essential" , stream: "JioHotstar" },
+    { title: "Thunderbolts*", type: "Movie", date: "May 2025", priority: "essential" , stream: "JioHotstar" },
+    { title: "Ironheart", type: "Series", date: "June 2025", priority: "essential" , stream: "JioHotstar" },
+    { title: "The Fantastic Four: First Steps", type: "Movie", date: "July 2025", priority: "essential" , stream: "JioHotstar" },
+    { title: "Eyes of Wakanda", type: "Series", date: "Aug 2025", priority: "side" , stream: "JioHotstar" },
+    { title: "Marvel Zombies", type: "Series", date: "Sept 2025", priority: "side" , stream: "JioHotstar" },
+  ]},
+  { year: "2026", items: [
+    { title: "Wonder Man", type: "Series", date: "Jan 2026", priority: "optional" , stream: "JioHotstar" },
+    { title: "Daredevil: Born Again, Season 2", type: "Series", date: "March-May 2026", priority: "essential" , stream: "JioHotstar" },
+    { title: "The Punisher: One Last Kill", type: "Special", date: "May 2026", priority: "essential" , stream: "JioHotstar" },
+    { title: "Spider-Noir", type: "Series", date: "May 27, 2026", priority: "non-mcu" , stream: "Prime Video" },
+    { title: "X-Men '97, Season 2", type: "Series", date: "July 2026", priority: "non-mcu" , stream: "JioHotstar" },
+    { title: "Spider-Man: Brand New Day", type: "Movie", date: "July 31, 2026", priority: "essential" , stream: "JioHotstar" },
+    { title: "Your Friendly Neighborhood Spider-Man, Season 2", type: "Series", date: "Fall 2026", upcoming: true, priority: "side" , stream: "JioHotstar" },
+    { title: "VisionQuest", type: "Series", date: "Oct 14, 2026", upcoming: true, priority: "essential" , stream: "JioHotstar" },
+    { title: "Avengers: Doomsday", type: "Movie", date: "Dec 18, 2026", upcoming: true, priority: "essential" , stream: "JioHotstar" },
+  ]},
+];
+
+// Separate tier: classic Marvel cartoons. Not part of the main list.
+// no shared titles, no shared state, never counted in any progress number.
+const cartoonsData = [
+  { title: "Fantastic Four (1994 series)", type: "Series (Animated)", date: "1994-1996", stream: "Streaming partner not found" },
+  { title: "Iron Man (1994 series)", type: "Series (Animated)", date: "1994-1996", stream: "Streaming partner not found" },
+  { title: "X-Men: The Animated Series", type: "Series (Animated)", date: "1992-1997", stream: "JioHotstar" },
+  { title: "Spider-Man: The Animated Series", type: "Series (Animated)", date: "1994-1998", stream: "Streaming partner not found" },
+  { title: "The Incredible Hulk (1996 series)", type: "Series (Animated)", date: "1996-1997", stream: "Streaming partner not found" },
+  { title: "Spider-Man Unlimited", type: "Series (Animated)", date: "1999-2001", stream: "Streaming partner not found" },
+  { title: "The Avengers: United They Stand", type: "Series (Animated)", date: "1999-2000", stream: "Streaming partner not found" },
+  { title: "X-Men: Evolution", type: "Series (Animated)", date: "2000-2003", stream: "Streaming partner not found" },
+  { title: "The Spectacular Spider-Man", type: "Series (Animated)", date: "2008-2009", stream: "Streaming partner not found" },
+  { title: "Iron Man: Armored Adventures", type: "Series (Animated)", date: "2009-2012", stream: "Streaming partner not found" },
+  { title: "The Super Hero Squad Show", type: "Series (Animated)", date: "2009-2011", stream: "Streaming partner not found" },
+  { title: "Wolverine and the X-Men", type: "Series (Animated)", date: "2009", stream: "Streaming partner not found" },
+  { title: "The Avengers: Earth's Mightiest Heroes", type: "Series (Animated)", date: "2010-2012", stream: "Streaming partner not found" },
+  { title: "Ultimate Spider-Man", type: "Series (Animated)", date: "2012-2017", stream: "JioHotstar" },
+  { title: "Avengers Assemble", type: "Series (Animated)", date: "2013-2019", stream: "JioHotstar" },
+  { title: "Hulk and the Agents of S.M.A.S.H.", type: "Series (Animated)", date: "2013-2015", stream: "Streaming partner not found" },
+  { title: "Guardians of the Galaxy (2015 series)", type: "Series (Animated)", date: "2015-2019", stream: "Streaming partner not found" },
+  { title: "Spider-Man (2017 series)", type: "Series (Animated)", date: "2017-2020", stream: "Streaming partner not found" },
+];
+
+let cartoonsState = {};
+cartoonsData.forEach(i => cartoonsState[i.title] = false);
+
+// SEPARATE tier: Marvel One-Shots. These were DVD/Blu-ray bonus shorts, never
+// given a proper wide streaming release. Availability is patchy and inconsistent by region
+// availability even on Disney+ globally, often missing from JioHotstar in India
+// specifically. Own state, own counter, never touches the main progress numbers.
+const oneShotsData = [
+  { title: "The Consultant", type: "One-Shot", date: "Sept 2011", stream: "Streaming partner not found" },
+  { title: "A Funny Thing Happened on the Way to Thor's Hammer", type: "One-Shot", date: "Oct 2011", stream: "Streaming partner not found" },
+  { title: "Item 47", type: "One-Shot", date: "Sept 2012", stream: "Streaming partner not found" },
+  { title: "Agent Carter (One-Shot)", type: "One-Shot", date: "Sept 2013", stream: "Streaming partner not found" },
+  { title: "All Hail the King", type: "One-Shot", date: "Feb 2014", stream: "Streaming partner not found" },
+  { title: "Team Thor", type: "One-Shot", date: "2016", stream: "Streaming partner not found" },
+  { title: "Team Thor: Part 2", type: "One-Shot", date: "Feb 2017", stream: "Streaming partner not found" },
+  { title: "Team Darryl", type: "One-Shot", date: "2018", stream: "Streaming partner not found" },
+];
+
+let oneShotsState = {};
+oneShotsData.forEach(i => oneShotsState[i.title] = false);
+
+// SEPARATE tier: very old Marvel movies/TV movies with zero bearing on today's
+// MCU. Obscure, mostly forgotten, no modern continuity ties. Own state, own
+// counter, never touches the main progress numbers.
+const oldMoviesData = [
+  { title: "Dr. Strange", type: "Movie (TV)", date: "Sept 1978", stream: "Streaming partner not found" },
+  { title: "Howard the Duck", type: "Movie", date: "Aug 1986", stream: "Streaming partner not found" },
+  { title: "The Incredible Hulk Returns", type: "Movie (TV)", date: "1988", stream: "Streaming partner not found" },
+  { title: "The Trial of the Incredible Hulk", type: "Movie (TV)", date: "May 1989", stream: "Streaming partner not found" },
+  { title: "The Punisher (1989)", type: "Movie", date: "1989", stream: "Streaming partner not found" },
+  { title: "The Death of the Incredible Hulk", type: "Movie (TV)", date: "Feb 1990", stream: "Streaming partner not found" },
+  { title: "Captain America", type: "Movie (TV)", date: "1990", stream: "Streaming partner not found" },
+  { title: "Generation X", type: "Movie (TV)", date: "Feb 1996", stream: "Streaming partner not found" },
+  { title: "Nick Fury: Agent of S.H.I.E.L.D.", type: "Movie (TV)", date: "May 1998", stream: "Streaming partner not found" },
+  { title: "Man-Thing", type: "Movie (TV)", date: "2005", stream: "Streaming partner not found" },
+];
+
+let oldMoviesState = {};
+oldMoviesData.forEach(i => oldMoviesState[i.title] = false);
+
+// Everything starts unchecked. Mark things off as you actually watch them.
+let state = {};
+data.forEach(g => g.items.forEach(i => state[i.title] = false));
+
+const STORAGE_KEY = "mcu-full-checklist-state-v2";
+
+const CARTOONS_STORAGE_KEY = "mcu-classic-cartoons-state-v1";
+const ONESHOTS_STORAGE_KEY = "mcu-one-shots-state-v1";
+const OLDMOVIES_STORAGE_KEY = "mcu-old-movies-state-v1";
+
+function loadOneStateObject(key, targetState) {
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      Object.keys(parsed).forEach(k => {
+        if (k in targetState) targetState[k] = parsed[k];
+      });
+    }
+  } catch (e) {
+    console.log("localStorage unavailable for key " + key + ", using defaults.");
+  }
+}
+
+function saveOneStateObject(key, targetState) {
+  try {
+    localStorage.setItem(key, JSON.stringify(targetState));
+  } catch (e) {
+    console.log("Could not save to localStorage for key " + key);
+  }
+}
+
+function loadState() {
+  loadOneStateObject(STORAGE_KEY, state);
+  loadOneStateObject(CARTOONS_STORAGE_KEY, cartoonsState);
+  loadOneStateObject(ONESHOTS_STORAGE_KEY, oneShotsState);
+  loadOneStateObject(OLDMOVIES_STORAGE_KEY, oldMoviesState);
+  render();
+}
+
+function saveState() {
+  saveOneStateObject(STORAGE_KEY, state);
+}
+
+function saveCartoonsState() {
+  saveOneStateObject(CARTOONS_STORAGE_KEY, cartoonsState);
+}
+
+function saveOneShotsState() {
+  saveOneStateObject(ONESHOTS_STORAGE_KEY, oneShotsState);
+}
+
+function saveOldMoviesState() {
+  saveOneStateObject(OLDMOVIES_STORAGE_KEY, oldMoviesState);
+}
+
+let currentView = "year"; // "year", "priority", or "cartoons"
+const priorityMeta = {
+  essential: { label: "Essential (sets up Doomsday)", order: 0 },
+  optional:  { label: "Optional, good but not required", order: 1 },
+  side:      { label: "Side stories, one-shots and animated spin-offs", order: 2 },
+  "non-mcu": { label: "Non-MCU, separate universes (Fox, Sony, Netflix etc.)", order: 3 },
+};
+
+function typeClass(type) {
+  if (type.startsWith("Movie")) return "type-movie";
+  if (type === "Series") return "type-series";
+  if (type === "One-Shot") return "type-oneshot";
+  if (type === "Special") return "type-special";
+  if (type === "Shorts") return "type-shorts";
+  return "type-other";
+}
+
+function makeItemEl(item, targetState, targetSave) {
+  targetState = targetState || state;
+  targetSave = targetSave || saveState;
+  const el = document.createElement("div");
+  el.className = "item" + (targetState[item.title] ? " checked" : "");
+  el.onclick = () => { targetState[item.title] = !targetState[item.title]; render(); targetSave(); };
+
+  const cb = document.createElement("div");
+  cb.className = "checkbox";
+  cb.textContent = targetState[item.title] ? "✓" : "";
+
+  const textBlock = document.createElement("div");
+  textBlock.className = "text-block";
+  const titleEl = document.createElement("div");
+  titleEl.className = "title";
+  titleEl.textContent = item.title;
+  if (item.upcoming) {
+    const b = document.createElement("span");
+    b.className = "badge upcoming";
+    b.textContent = "upcoming";
+    titleEl.appendChild(b);
+  }
+  if (item.priority === "non-mcu" || item.differentContinuity) {
+    const b2 = document.createElement("span");
+    b2.className = "badge non-mcu";
+    b2.textContent = "non-MCU";
+    titleEl.appendChild(b2);
+  }
+  const metaEl = document.createElement("div");
+  metaEl.className = "meta";
+
+  const typeSpan = document.createElement("span");
+  typeSpan.className = "type-tag " + typeClass(item.type);
+  typeSpan.textContent = item.type;
+
+  const restSpan = document.createElement("span");
+  restSpan.textContent = " · " + item.date + " · " + item.stream;
+
+  metaEl.appendChild(typeSpan);
+  metaEl.appendChild(restSpan);
+
+  textBlock.appendChild(titleEl);
+  textBlock.appendChild(metaEl);
+  el.appendChild(cb);
+  el.appendChild(textBlock);
+  return el;
+}
+
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  let total = 0, checked = 0;
+
+  data.forEach(g => g.items.forEach(i => { total++; if (state[i.title]) checked++; }));
+
+  if (currentView === "year") {
+    data.forEach(group => {
+      const yearLabel = document.createElement("div");
+      yearLabel.className = "year-label";
+      yearLabel.textContent = group.year;
+      list.appendChild(yearLabel);
+      group.items.forEach(item => list.appendChild(makeItemEl(item)));
+    });
+  } else if (currentView === "priority") {
+    const sectionTitle = document.createElement("div");
+    sectionTitle.className = "section-title";
+    sectionTitle.textContent = "By priority";
+    const sectionNote = document.createElement("div");
+    sectionNote.className = "section-note";
+    sectionNote.textContent = "Essential means you'll want to watch this to fully follow the story leading into Doomsday. This includes some older X-Men and Spider-Man movies too, since certain later MCU films connect back to them. Optional means good to watch but not required. Side means one-shots, shorts, and animated spin-offs. Non-MCU means other Marvel movies that don't affect Doomsday's story at all.";
+    list.appendChild(sectionTitle);
+    list.appendChild(sectionNote);
+
+    ["essential", "optional", "side", "non-mcu"].forEach(priorityKey => {
+      const itemsInCategory = [];
+      data.forEach(group => {
+        group.items.filter(i => i.priority === priorityKey).forEach(item => itemsInCategory.push(item));
+      });
+      const catTotal = itemsInCategory.length;
+      const catChecked = itemsInCategory.filter(i => state[i.title]).length;
+
+      const label = document.createElement("div");
+      label.className = "priority-label " + priorityKey;
+      label.textContent = priorityMeta[priorityKey].label + "  (" + catChecked + "/" + catTotal + ")";
+      list.appendChild(label);
+
+      itemsInCategory.forEach(item => {
+        const el = makeItemEl(item);
+        list.appendChild(el);
+      });
+    });
+  } else if (currentView === "cartoons") {
+    const catChecked = cartoonsData.filter(i => cartoonsState[i.title]).length;
+    const sectionTitle = document.createElement("div");
+    sectionTitle.className = "section-title";
+    sectionTitle.textContent = "Classic Cartoons  (" + catChecked + "/" + cartoonsData.length + ")";
+    const sectionNote = document.createElement("div");
+    sectionNote.className = "section-note";
+    sectionNote.textContent = "Old-school Marvel cartoons from the 90s through around 2013. This tab is completely separate from the main checklist, so nothing here counts toward the progress bar or any of the numbers above. Just here for fun.";
+    list.appendChild(sectionTitle);
+    list.appendChild(sectionNote);
+
+    cartoonsData.forEach(item => {
+      const el = makeItemEl(item, cartoonsState, saveCartoonsState);
+      list.appendChild(el);
+    });
+  } else if (currentView === "oneshots") {
+    const catChecked = oneShotsData.filter(i => oneShotsState[i.title]).length;
+    const sectionTitle = document.createElement("div");
+    sectionTitle.className = "section-title";
+    sectionTitle.textContent = "One-Shots  (" + catChecked + "/" + oneShotsData.length + ")";
+    const sectionNote = document.createElement("div");
+    sectionNote.className = "section-note";
+    sectionNote.textContent = "These are Marvel's DVD and Blu-ray bonus shorts from 2011 to 2018. They were never given a proper streaming release, so they're patchy even on Disney+ worldwide and mostly missing from JioHotstar in India. This tab is separate from the main checklist and doesn't count toward any of the numbers above.";
+    list.appendChild(sectionTitle);
+    list.appendChild(sectionNote);
+
+    oneShotsData.forEach(item => {
+      const el = makeItemEl(item, oneShotsState, saveOneShotsState);
+      list.appendChild(el);
+    });
+  } else if (currentView === "oldmovies") {
+    const catChecked = oldMoviesData.filter(i => oldMoviesState[i.title]).length;
+    const sectionTitle = document.createElement("div");
+    sectionTitle.className = "section-title";
+    sectionTitle.textContent = "Old Movies  (" + catChecked + "/" + oldMoviesData.length + ")";
+    const sectionNote = document.createElement("div");
+    sectionNote.className = "section-note";
+    sectionNote.textContent = "Very old Marvel movies and TV movies that have no connection to today's MCU. This tab is separate from the main checklist and doesn't count toward any of the numbers above. Here just for completeness.";
+    list.appendChild(sectionTitle);
+    list.appendChild(sectionNote);
+
+    oldMoviesData.forEach(item => {
+      const el = makeItemEl(item, oldMoviesState, saveOldMoviesState);
+      list.appendChild(el);
+    });
+  }
+
+  document.getElementById("progressText").textContent = checked + " / " + total + " watched";
+  document.getElementById("progressPct").textContent = Math.round((checked/total)*100) + "%";
+  document.getElementById("progressFill").style.width = Math.round((checked/total)*100) + "%";
+}
+
+function setView(view) {
+  currentView = view;
+  document.getElementById("tabYear").classList.toggle("active", view === "year");
+  document.getElementById("tabPriority").classList.toggle("active", view === "priority");
+  document.getElementById("tabCartoons").classList.toggle("active", view === "cartoons");
+  document.getElementById("tabOneShots").classList.toggle("active", view === "oneshots");
+  document.getElementById("tabOldMovies").classList.toggle("active", view === "oldmovies");
+  render();
+}
+
+let clearArmed = false;
+let clearArmTimeout = null;
+
+function confirmClearAll() {
+  const btn = document.getElementById("clearBtn");
+
+  if (!clearArmed) {
+    clearArmed = true;
+    btn.textContent = "Tap again to confirm, this clears everything";
+    btn.classList.add("armed");
+    clearTimeout(clearArmTimeout);
+    clearArmTimeout = setTimeout(() => {
+      clearArmed = false;
+      btn.textContent = "Clear all checks";
+      btn.classList.remove("armed");
+    }, 4000);
+    return;
+  }
+
+  clearTimeout(clearArmTimeout);
+  clearArmed = false;
+  btn.textContent = "Clear all checks";
+  btn.classList.remove("armed");
+
+  Object.keys(state).forEach(k => state[k] = false);
+  render();
+  saveState();
+}
+
+let currentExport = null; // null, "watched", or "unwatched"
+
+function toggleExport(type) {
+  const box = document.getElementById("exportBox");
+
+  if (currentExport === type) {
+    // Same button tapped again, hide it
+    box.style.display = "none";
+    currentExport = null;
+    return;
+  }
+
+  let out;
+  if (type === "unwatched") {
+    out = "Haven't watched yet:\n\n";
+    data.forEach(group => {
+      const unwatched = group.items.filter(i => !state[i.title]);
+      if (unwatched.length) {
+        out += group.year + ":\n";
+        unwatched.forEach(i => out += "- " + i.title + " (" + i.type + ", " + i.date + ")\n");
+        out += "\n";
+      }
+    });
+  } else {
+    out = "Already watched:\n\n";
+    data.forEach(group => {
+      const watched = group.items.filter(i => state[i.title]);
+      if (watched.length) {
+        out += group.year + ":\n";
+        watched.forEach(i => out += "- " + i.title + " (" + i.type + ", " + i.date + ")\n");
+        out += "\n";
+      }
+    });
+  }
+
+  box.style.display = "block";
+  box.value = out.trim();
+  box.select();
+  currentExport = type;
+}
+
+try {
+  loadState();
+} catch (e) {
+  document.getElementById("list").innerHTML =
+    '<div style="color:#ff8a8f; padding:20px; text-align:center;">' +
+    'Something went wrong loading the checklist.<br><br>Error: ' +
+    (e && e.message ? e.message : e) +
+    '<br><br>Try closing and reopening this page.</div>';
+}
+</script>
+</body>
+</html>
