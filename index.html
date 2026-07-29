@@ -12,6 +12,15 @@
     margin: 0;
     padding: 20px 20px 60px 20px;
   }
+  .page-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  @media (min-width: 700px) {
+    body {
+      padding: 40px 20px 60px 20px;
+    }
+  }
   h1 {
     font-size: 1.3rem;
     margin-bottom: 4px;
@@ -136,6 +145,16 @@
     margin: 20px 0;
     flex-wrap: wrap;
   }
+  .buttons.extra-tabs {
+    padding-top: 14px;
+    border-top: 1px solid #1e2027;
+    gap: 8px;
+  }
+  .buttons.extra-tabs button.action.tab {
+    font-size: 0.8rem;
+    padding: 8px 12px;
+    opacity: 0.85;
+  }
   button.action {
     background: #ed1d24;
     color: white;
@@ -248,6 +267,8 @@
 </head>
 <body>
 
+<div class="page-wrap">
+
 <h1>Marvel Checklist</h1>
 <div class="subtitle">Every Marvel Studios movie, series and special from 1986 to now, plus non-MCU Marvel movies from other studios. Tap to check off what you've watched. Streaming links are for India.</div>
 
@@ -265,14 +286,17 @@
 <div class="buttons">
   <button class="action tab active" id="tabYear" onclick="setView('year')">By year</button>
   <button class="action tab" id="tabPriority" onclick="setView('priority')">By priority</button>
-  <button class="action tab" id="tabCartoons" onclick="setView('cartoons')">Classic Cartoons</button>
-  <button class="action tab" id="tabOneShots" onclick="setView('oneshots')">One-Shots</button>
-  <button class="action tab" id="tabOldMovies" onclick="setView('oldmovies')">Old Movies</button>
 </div>
 
 <div class="buttons">
   <button class="action" onclick="toggleExport('unwatched')">Export not watched</button>
   <button class="action secondary" onclick="toggleExport('watched')">Export watched</button>
+</div>
+
+<div class="buttons extra-tabs">
+  <button class="action tab" id="tabCartoons" onclick="setView('cartoons')">Classic Cartoons</button>
+  <button class="action tab" id="tabOneShots" onclick="setView('oneshots')">One-Shots</button>
+  <button class="action tab" id="tabOldMovies" onclick="setView('oldmovies')">Old Movies</button>
 </div>
 
 <textarea id="exportBox" readonly></textarea>
@@ -307,6 +331,8 @@
     </svg>
     Built by <a href="https://www.instagram.com/also.surajnagendra?igsh=bjE0MXNpeTBmcndu" target="_blank" rel="noopener">also.surajnagendra</a>. Drop a follow.
   </div>
+</div>
+
 </div>
 
 <script>
