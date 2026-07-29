@@ -4,8 +4,7 @@ An interactive, mobile-friendly checklist of the MCU movies and shows.
 Tap an item to mark it watched — your progress is saved in your own
 browser (nothing is sent anywhere or shared with other visitors).
 
-**Live page:** add your GitHub Pages link here once it's enabled, e.g.
-`https://YOUR-USERNAME.github.io/mcu-checklist/`
+**Live page:** https://suraj-nagendra.github.io/mcu-checklist/
 
 ## About
 
