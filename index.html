@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Marvel Checklist</title>
+<title>Ultimate Marvel Checklist</title>
 <style>
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -200,10 +200,12 @@
   .priority-label.optional { color: #f0c14b; }
   .priority-label.side { color: #6ea8ff; }
   .priority-label.non-mcu { color: #b485f0; }
+  .priority-label.post-doomsday { color: #4fd1c5; }
   .badge.essential { background: #3a1416; color: #ff8a8f; }
   .badge.optional { background: #3a2e10; color: #f0c14b; }
   .badge.side { background: #10233a; color: #6ea8ff; }
   .badge.non-mcu { background: #2a1a3a; color: #b485f0; }
+  .badge.post-doomsday { background: #10302d; color: #4fd1c5; }
   .credit-footer {
     text-align: center;
     padding: 4px 0 24px 0;
@@ -269,7 +271,7 @@
 
 <div class="page-wrap">
 
-<h1>Marvel Checklist</h1>
+<h1>Ultimate Marvel Checklist</h1>
 <div class="subtitle">Every Marvel Studios movie, series and special from 1986 to now, plus non-MCU Marvel movies from other studios. Tap to check off what you've watched. Streaming links are for India.</div>
 
 <div class="progress">
@@ -289,8 +291,8 @@
 </div>
 
 <div class="buttons">
-  <button class="action" onclick="toggleExport('unwatched')">Export not watched</button>
-  <button class="action secondary" onclick="toggleExport('watched')">Export watched</button>
+  <button class="action tab" id="exportUnwatchedBtn" onclick="toggleExport('unwatched')">Export not watched</button>
+  <button class="action tab" id="exportWatchedBtn" onclick="toggleExport('watched')">Export watched</button>
 </div>
 
 <div class="buttons extra-tabs">
@@ -535,6 +537,22 @@ const data = [
     { title: "VisionQuest", type: "Series", date: "Oct 14, 2026", upcoming: true, priority: "essential" , stream: "JioHotstar" },
     { title: "Avengers: Doomsday", type: "Movie", date: "Dec 18, 2026", upcoming: true, priority: "essential" , stream: "JioHotstar" },
   ]},
+  { year: "2027", items: [
+    { title: "Daredevil: Born Again, Season 3", type: "Series", date: "2027 (final season)", priority: "post-doomsday" , stream: "JioHotstar" },
+    { title: "X-Men '97, Season 3", type: "Series", date: "2027", priority: "post-doomsday" , stream: "JioHotstar" },
+    { title: "Marvel Zombies: The Winter Soldier", type: "Series", date: "Halloween 2027", priority: "post-doomsday" , stream: "JioHotstar" },
+    { title: "Avengers: Secret Wars", type: "Movie", date: "Dec 17, 2027", priority: "post-doomsday" , stream: "Not announced yet" },
+  ]},
+  { year: "2028", items: [
+    { title: "Marvel Studios' X-Men (2028)", type: "Movie", date: "May 5, 2028", priority: "post-doomsday" , stream: "Not announced yet" },
+    { title: "Ghost Rider (2028)", type: "Movie", date: "July 28, 2028", priority: "post-doomsday" , stream: "Not announced yet" },
+    { title: "Zodiac", type: "Series", date: "2028", priority: "post-doomsday" , stream: "JioHotstar" },
+    { title: "Marvel Zombies: The Fist of Khonshu", type: "Series", date: "Halloween 2028", priority: "post-doomsday" , stream: "JioHotstar" },
+    { title: "Black Panther 3", type: "Movie", date: "Dec 15, 2028", priority: "post-doomsday" , stream: "Not announced yet" },
+  ]},
+  { year: "2029", items: [
+    { title: "Marvel Zombies: The Last Guardian", type: "Series", date: "2029", priority: "post-doomsday" , stream: "JioHotstar" },
+  ]},
 ];
 
 // Separate tier: classic Marvel cartoons. Not part of the main list.
@@ -659,6 +677,7 @@ function saveOldMoviesState() {
 let currentView = "year"; // "year", "priority", or "cartoons"
 const priorityMeta = {
   essential: { label: "Essential (sets up Doomsday)", order: 0 },
+  "post-doomsday": { label: "After Doomsday (announced, not out yet)", order: 0.5 },
   optional:  { label: "Optional, good but not required", order: 1 },
   side:      { label: "Side stories, one-shots and animated spin-offs", order: 2 },
   "non-mcu": { label: "Non-MCU, separate universes (Fox, Sony, Netflix etc.)", order: 3 },
@@ -701,6 +720,12 @@ function makeItemEl(item, targetState, targetSave) {
     b2.textContent = "non-MCU";
     titleEl.appendChild(b2);
   }
+  if (item.priority === "post-doomsday") {
+    const b4 = document.createElement("span");
+    b4.className = "badge post-doomsday";
+    b4.textContent = "after Doomsday";
+    titleEl.appendChild(b4);
+  }
   const metaEl = document.createElement("div");
   metaEl.className = "meta";
 
@@ -742,11 +767,11 @@ function render() {
     sectionTitle.textContent = "By priority";
     const sectionNote = document.createElement("div");
     sectionNote.className = "section-note";
-    sectionNote.textContent = "Essential means you'll want to watch this to fully follow the story leading into Doomsday. This includes some older X-Men and Spider-Man movies too, since certain later MCU films connect back to them. Optional means good to watch but not required. Side means one-shots, shorts, and animated spin-offs. Non-MCU means other Marvel movies that don't affect Doomsday's story at all.";
+    sectionNote.textContent = "Essential means you'll want to watch this to fully follow the story leading into Doomsday. This includes some older X-Men and Spider-Man movies too, since certain later MCU films connect back to them. After Doomsday means projects Marvel has announced for after that movie, so there is nothing to watch yet. Optional means good to watch but not required. Side means one-shots, shorts, and animated spin-offs. Non-MCU means other Marvel movies that don't affect Doomsday's story at all.";
     list.appendChild(sectionTitle);
     list.appendChild(sectionNote);
 
-    ["essential", "optional", "side", "non-mcu"].forEach(priorityKey => {
+    ["essential", "post-doomsday", "optional", "side", "non-mcu"].forEach(priorityKey => {
       const itemsInCategory = [];
       data.forEach(group => {
         group.items.filter(i => i.priority === priorityKey).forEach(item => itemsInCategory.push(item));
@@ -864,6 +889,7 @@ function toggleExport(type) {
     // Same button tapped again, hide it
     box.style.display = "none";
     currentExport = null;
+    updateExportButtons();
     return;
   }
 
@@ -894,6 +920,12 @@ function toggleExport(type) {
   box.value = out.trim();
   box.select();
   currentExport = type;
+  updateExportButtons();
+}
+
+function updateExportButtons() {
+  document.getElementById("exportUnwatchedBtn").classList.toggle("active", currentExport === "unwatched");
+  document.getElementById("exportWatchedBtn").classList.toggle("active", currentExport === "watched");
 }
 
 try {
